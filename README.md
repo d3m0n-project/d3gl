@@ -1,51 +1,69 @@
 # d3gl
 
-**d3m0n Graphical Library for Lua**
+**d3m0n Graphical Library for Lua and Python**
 
-`d3gl` is a graphical library for Lua, designed for the d3m0n operating system. It provides a simple interface for creating graphical surfaces, drawing pixels, and updating the display.
-
-Python support through CPython is planned.
+`d3gl` is a graphical library for the d3m0n operating system. It provides a simple interface for creating graphical surfaces, drawing pixels, and updating the display through Lua and Python.
 
 ## Features
 
-- Create graphical surfaces with a custom width and height.
-- Draw pixels using RGBA-style hexadecimal color constants.
+- Create graphical surfaces with custom dimensions.
+- Draw pixels using predefined hexadecimal color constants.
 - Update the surface to display your changes.
-- Simple Lua API designed for graphics programming.
-- Future support for Python.
+- Support for both Lua and Python.
+- Separate implementations organized into `lua/` and `python/` directories.
 
 ## Requirements
 
 - The d3m0n operating system.
-- A working Lua runtime: [d3m0n-project/lua](https://github.com/d3m0n-project/lua).
-- The `sys` Lua module provided by the operating system.
-- The `d3gl` library installed in your Lua module path.
+- A working Lua runtime: [d3m0n-project/lua](<https://github.com/d3m0n-project/lua>).
+- A working Python runtime: [d3m0n-project/micropython](<https://github.com/d3m0n-project/micropython>).
+- The required system graphics support provided by d3m0n.
+- The appropriate `d3gl` implementation installed and accessible to your runtime.
+
+## Project structure
+
+The repository contains separate implementations for Lua and Python:
+
+```
+d3gl/
+├── lua/
+│   └── ...
+└── python/
+    └── ...
+```
+
+Each directory contains the implementation intended for its respective runtime. Install or configure the implementation for the language you want to use.
 
 ## Installation
 
-Place the library in your Lua library directory:
+### Lua
 
-```
-/lib/lua/d3gl/
-└── init.lua
-```
+Install the contents of the `lua/` directory in a location accessible to your d3m0n Lua runtime.
 
-If your Lua runtime uses `/lib/lua/?.lua` and `/lib/lua/?/init.lua` as module search paths, you can import the library with:
+Make sure the module is available through your Lua module search path. Then import it with:
 
 ```
 local d3gl = require("d3gl")
 ```
 
-If your runtime does not handle the starting directory correctly, configure the module search path or use your system's Lua loader.
+The exact installation path depends on your d3m0n environment and Lua module configuration.
+
+### Python
+
+Install or copy the contents of the `python/` directory to a location accessible to your d3m0n Python runtime.
+
+Ensure that the module can be imported by your Python interpreter. The exact installation path depends on your d3m0n environment and Python module search configuration.
 
 ## Getting started
+
+### Lua example
 
 Create a file named `main.lua`:
 
 ```
 local d3gl = require("d3gl")
 
--- Create a 320 x 448 (fullscreen) graphical surface.
+-- Create a 320 x 448 graphical surface.
 d3gl.init(320, 448)
 
 -- Draw a few pixels.
@@ -63,7 +81,34 @@ Run the script using your d3m0n Lua interpreter:
 lua main.lua
 ```
 
+### Python example
+
+The Python implementation is provided in the `python/` directory. Import the installed module and use the functions exposed by that implementation.
+
+The following illustrates the intended workflow; adjust the import and function names to match the actual Python API:
+
+```
+import d3gl
+
+# Create a 320 x 448 graphical surface.
+gl = d3gl(320, 448)
+
+# Draw a few pixels.
+gl.putpixel(10, 10, d3gl.Colors.RED)
+gl.putpixel(11, 10, d3gl.Colors.GREEN)
+gl.putpixel(12, 10, d3gl.Colors.BLUE)
+
+# Display the changes.
+gl.update()
+```
+
+Run the script using your d3m0n Python interpreter. The exact command depends on how Python is configured on your system.
+
+**Note:** The Python example assumes that the Python implementation exposes an API equivalent to the Lua interface. Check the files in `python/` for the exact import path, function names, and constants.
+
 ## API reference
+
+The following API describes the Lua interface. Python equivalents depend on the functions and names exported by the Python implementation.
 
 ### `d3gl.init(width, height)`
 
@@ -104,7 +149,7 @@ Coordinates must remain within the surface dimensions.
 
 ### `d3gl.update()`
 
-Requests an update of the graphical surface so the changes can be displayed.
+Requests an update of the graphical surface so that the changes can be displayed.
 
 Example:
 
@@ -117,7 +162,7 @@ For better performance, draw multiple pixels before calling `d3gl.update()` inst
 
 ## Colors
 
-`d3gl.Colors` provides predefined colors.
+`d3gl.Colors` provides predefined color constants.
 
 | Constant | Value |
 | --- | --- |
@@ -142,7 +187,11 @@ d3gl.update()
 
 These constants use the numeric values defined by the library. The actual channel layout depends on the pixel format expected by the d3m0n graphics subsystem.
 
+Check the Python implementation for the corresponding way to access its color constants.
+
 ## Example: Draw a rectangle
+
+This Lua example fills a rectangular region with green pixels:
 
 ```
 local d3gl = require("d3gl")
@@ -164,36 +213,35 @@ end
 d3gl.update()
 ```
 
-This example fills a rectangular region with green pixels.
+The same approach can be implemented in Python using the equivalent functions exposed by the Python implementation.
 
 ## Notes and limitations
 
 - Initialize the surface before calling `d3gl.putpixel()` or `d3gl.update()`.
 - Drawing outside the surface bounds is invalid.
 - Surface creation and updates depend on the operating system's graphics support.
-- The pixel format and color channel order must match the format expected by the underlying surface.
-- The current API focuses on pixel-level drawing. Higher-level primitives, such as lines, circles, and rectangles, can be implemented on top of `d3gl.putpixel()`.
-- The API anDrawing lines and rectanglesd examples may evolve as the library develops.
+- Pixel format and color channel order must match the format expected by the underlying surface.
+- The API focuses on pixel-level drawing. Higher-level primitives, such as lines, circles, and rectangles, can be implemented using pixel drawing.
+- Lua and Python implementations may differ in module loading, function naming, and runtime integration. Consult the corresponding directory for implementation-specific details.
 
 ## Roadmap
 
-- [x] Basic Lua module structure
-- [x] Surface creation interface
-- [ ] More pixel color constants
-- [ ] Reliable pixel-buffer access
-- [ ] Drawing lines and rectangles
-- [ ] Drawing circles
-- [ ] Image loading
-- [ ] Text rendering
-- [ ] Python bindings
+- [x]Basic Lua module structure
+- [x]Surface creation interface
+- [x]Python implementation
+- [ ]More pixel color constants
+- [ ]Reliable pixel-buffer access
+- [ ]Drawing lines and rectangles
+- [ ]Drawing circles
+- [ ]Image loading
+- [ ]Text rendering
 
 ## Related projects
 
-- [d3m0n lua](https://github.com/d3m0n-project/lua)
-- [d3m0n CPython](https://github.com/d3m0n-project/cpython)
+- [d3m0n os](<https://github.com/d3m0n-project/d3m0n_os>)
+- [d3m0n Lua](<https://github.com/d3m0n-project/lua>)
+- [d3m0n MicroPython](<https://github.com/d3m0n-project/micropython>)
 
 ## License
 
 See the repository's `LICENSE` file for licensing information.
-
-Implementation note: Your current C binding returns a raw surface pointer as Lua light userdata. For the README's `d3gl.putpixel()` examples to work, the library must expose a pixel-writing function or a Lua-accessible buffer; raw pointers cannot be indexed directly from standard Lua.
