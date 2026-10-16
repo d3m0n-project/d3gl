@@ -1,8 +1,7 @@
-from enum import Enum
 import sys
 
 class d3gl:
-	class Colors(Enum):
+	class Colors:
 		BLACK = 0xff000000,
 		WHITE = 0xffffffff,
 		RED   = 0xff0000ff,
