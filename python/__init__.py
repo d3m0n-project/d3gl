@@ -1,3 +1,3 @@
-from .d3gl import init, update, putpixel
+from .d3gl import init, update, putpixel, Colors
 
-__all__ = ["init", "update", "putpixel"]
+__all__ = ["init", "update", "putpixel", "Colors"]
