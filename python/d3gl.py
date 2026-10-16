@@ -14,8 +14,8 @@ class d3gl:
 
 	def __init__(self, width: int, height: int):
 		self.surface, p, ret = sys.surface_create(width, height)
-		if ret == 0 and self.surface is None:
-			raise self.d3glException("surface creation failed")
+		if ret != 0 and self.surface is None:
+			raise self.d3glException("Surface creation failed")
 		
 		self.width = width
 		self.height = height
