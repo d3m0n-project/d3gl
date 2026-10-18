@@ -1,3 +1,6 @@
-from .d3gl import init, update, putpixel, Colors
+from .d3gl import Core, Colors, d3glException
+from .basics import Basics
 
-__all__ = ["init", "update", "putpixel", "Colors"]
+
+class D3GL(Core, Basics):
+    pass
