@@ -231,8 +231,8 @@ The same approach can be implemented in Python using the equivalent functions ex
 - [x]Python implementation
 - [ ]More pixel color constants
 - [ ]Reliable pixel-buffer access
-- [ ]Drawing lines and rectangles
-- [ ]Drawing circles
+- [x]Drawing lines and rectangles
+- [x]Drawing circles
 - [ ]Image loading
 - [ ]Text rendering
 
