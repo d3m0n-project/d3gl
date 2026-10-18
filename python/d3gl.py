@@ -21,6 +21,9 @@ class Core:
         surface, p, ret = sys.surface_create(_width, _height)
         if ret != 0 or surface is None:
             raise d3glException("Surface creation failed")
+        surface, p, ret = sys.surface_create(_width, _height)
+        if ret != 0 or surface is None:
+            raise d3glException("Surface creation failed")
 
         self.surface = surface
         self.pitch = p
@@ -45,13 +48,20 @@ class Core:
             raise d3glException("Y out of bounds")
 
         sys.c_buffer_uint32_set(self.surface, (y * self.width + x), color)
+        sys.c_buffer_uint32_set(self.surface, (y * self.width + x), color)
 
 
     def update(self) -> None:
         if self.surface is None:
             raise d3glException("Surface address could not be resolved, failed to initialize")
+    def update(self) -> None:
+        if self.surface is None:
+            raise d3glException("Surface address could not be resolved, failed to initialize")
 
         ret = sys.surface_update(self.surface)
+        ret = sys.surface_update(self.surface)
 
+        if ret != 0:
+            raise d3glException("Surface update failed")
         if ret != 0:
             raise d3glException("Surface update failed")
