@@ -1,5 +1,3 @@
---- @param base table?
---- @return table class
 local function newClass(base)
     local c = {}
     if type(base) == 'table' then

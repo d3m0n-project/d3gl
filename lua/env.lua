@@ -1,14 +1,22 @@
+local import = ...
+
 local env = {}
 
+local function readFile(path)
+    if not io then return nil end
+    local file = io.open(path, "r")
+    if not file then return nil end
+    local content = file:read("*a")
+    file:close()
+    return content
+end
 
---- @param path string? 
---- @return table env
 function env:Load(path)
-    local Logger = require("src.core.logger")
+    local Logger = import("logger")
     path = path or ".env"
-    local content = love.filesystem.read(path)
+    local content = readFile(path)
     if not content then
-        Logger:warn("core", ".env not found")
+        Logger:warn("env", path .. " not found")
         return env
     end
 
@@ -17,21 +25,18 @@ function env:Load(path)
             local key, value = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
             if key then
                 value = value:gsub('^["\'](.*)["\']$', "%1")
-                env[key] = value
+                env[key] = tonumber(value) or value
             end
         end
     end
-    Logger:info("core", "variables loaded successfuly")
+    Logger:info("env", "variables loaded successfully")
     return env
 end
 
---- @param variable string
---- @param default_value any
---- @return any
-function env:Get(variable, default_value) 
-    if not env[variable] then
+function env:Get(variable, default_value)
+    if env[variable] == nil then
         env[variable] = default_value
-    end 
+    end
     return env[variable]
 end
 

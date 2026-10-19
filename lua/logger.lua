@@ -1,14 +1,12 @@
-local env = require("env")
-local table = require("table")
-local json = require("json")
+local import = ...
+local env = import("env")
+local table = import("table")
+local json = import("json")
 
---- @class Logger
---- @field Enabled boolean
---- @field LogLevel number
-Logger = {}
-Logger.Enabled = env:Get("DEV", 1) == 1 and true or false
+local Logger = {}
+Logger.Enabled = tonumber(env:Get("DEV", 1)) == 1
 
-Logger.LogLevel = env:Get("LOG_LEVELS", Logger.Enabled and 3 or 0)
+Logger.LogLevel = tonumber(env:Get("LOG_LEVELS", Logger.Enabled and 3 or 0))
 
 local LOG_LEVELS = {
     ERROR = 0,
@@ -27,8 +25,6 @@ local ANSI = {
     RESET = "\27[0m"
 }
 
---- @param ... any 
---- @return string[]
 local function parseArguments(...)
     local arguments = {...}
     local parsedArguments = {}
@@ -44,16 +40,12 @@ local function parseArguments(...)
     return parsedArguments
 end
 
---- @param module string 
---- @param ... any
 function Logger:error(module, ...)
     if self.LogLevel < LOG_LEVELS.ERROR then return end
 
     print(ANSI.RED .. "[ERROR] " .. ANSI.CYAN .. "[" .. string.upper(module) .. "] > " .. ANSI.RESET .. table.concat(parseArguments(...), " ") .. ANSI.RESET)
 end
 
---- @param module string
---- @param ... any
 function Logger:warn(module, ...)
     if not self.Enabled then return end
     if self.LogLevel < LOG_LEVELS.WARN then return end
@@ -61,8 +53,6 @@ function Logger:warn(module, ...)
     print(ANSI.YELLOW .. "[WARN] " .. ANSI.CYAN .. "[" .. string.upper(module) .. "] > " .. ANSI.RESET .. table.concat(parseArguments(...), " ") .. ANSI.RESET)
 end
 
---- @param module string
---- @param ... any
 function Logger:info(module, ...)
     if not self.Enabled then return end
     if self.LogLevel < LOG_LEVELS.INFO then return end
@@ -70,8 +60,6 @@ function Logger:info(module, ...)
     print(ANSI.GREEN .. "[INFO] " .. ANSI.CYAN .. "[" .. string.upper(module) .. "] > " .. ANSI.RESET .. table.concat(parseArguments(...), " ") .. ANSI.RESET)
 end
 
---- @param module string
---- @param ... any
 function Logger:trace(module, ...)
     if not self.Enabled then return end
     if self.LogLevel < LOG_LEVELS.TRACE then return end
@@ -79,7 +67,6 @@ function Logger:trace(module, ...)
     print(ANSI.GREY .. "[TRACE] " .. ANSI.CYAN .. "[" .. string.upper(module) .. "] > " .. ANSI.RESET .. table.concat(parseArguments(...), " ") .. ANSI.RESET)
 end
 
---- @param data []
 function Logger:debug(data)
     local function cpy(t)
         local seen = {}

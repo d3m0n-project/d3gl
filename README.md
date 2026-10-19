@@ -106,6 +106,115 @@ Run the script using your d3m0n Python interpreter. The exact command depends on
 
 **Note:** The Python example assumes that the Python implementation exposes an API equivalent to the Lua interface. Check the files in `python/` for the exact import path, function names, and constants.
 
+## Lua API
+
+The Lua implementation lives in `lua/` and is loaded with `require("d3gl")`
+(d3m0n preloads it through `/lib/lua/loader.lua`). Internal modules are loaded
+relative to `lua/init.lua`, so nothing else needs to be on `package.path`.
+
+### Backends
+
+The backend is picked automatically, or forced with `D3GL_BACKEND=<name>`:
+
+| Backend | When | Use |
+| --- | --- | --- |
+| `d3m0n` | the `sys` module exists | real device surface (320x448 only) |
+| `headless` | anything else (plain Lua) | in-memory surface for tests, `D3GL_FRAMES`, `D3GL_SCREENSHOT` |
+
+The same application code runs unchanged on both.
+
+### Main loop
+
+```lua
+local d3gl = require("d3gl")
+
+d3gl.run({
+    load = function() end,
+    update = function(dt) end,   -- dt in seconds
+    draw = function()            -- the surface is presented after draw()
+        d3gl.clear(d3gl.Colors.BLACK)
+        d3gl.draw_fps()
+    end,
+}, { title = "my app" })
+```
+
+`d3gl.run(app, opts)` calls `d3gl.init()` if needed. Options: `width`, `height`,
+`fixed_dt`, `frames` (stop after N frames). `d3gl.quit()` stops the loop.
+
+Timing: real `dt` on PC. On d3m0n `sys.clock()` only has a 1 second resolution,
+so `dt` is `1 / frames measured during the last second` (or `fixed_dt`).
+
+### Core
+
+| Function | Description |
+| --- | --- |
+| `d3gl.init(w?, h?, opts?)` | creates the surface (defaults to 320x448) |
+| `d3gl.update()` | presents the surface (done by `run` automatically) |
+| `d3gl.width`, `d3gl.height`, `d3gl.get_size()` | surface size |
+| `d3gl.backend` | `"d3m0n"` or `"headless"` |
+| `d3gl.fps()`, `d3gl.time()`, `d3gl.timer` | frame timing inside `run` |
+| `d3gl.screenshot(path)` | PPM (headless only) |
+
+### Drawing
+
+All primitives accept float coordinates and are clipped to the surface:
+drawing off-screen is safe. `color` is the outline, `fill` the fill color;
+either can be `nil`.
+
+| Function | Description |
+| --- | --- |
+| `d3gl.putpixel(x, y, color)` | single pixel |
+| `d3gl.clear(color)` / `d3gl.set_background(color)` | fill the surface |
+| `d3gl.draw_hline(x1, x2, y, color)`, `d3gl.draw_vline(x, y1, y2, color)` | fast lines |
+| `d3gl.draw_line(x1, y1, x2, y2, color)` | Bresenham line |
+| `d3gl.draw_rectangle(x, y, w, h, color, fill)` | exactly `w x h` pixels |
+| `d3gl.fill_rect(x, y, w, h, color)` | filled rectangle |
+| `d3gl.draw_circle(xc, yc, r, color, fill)` | midpoint circle |
+| `d3gl.draw_triangle(x1, y1, x2, y2, x3, y3, color, fill)` | triangle (boids) |
+| `d3gl.draw_polygon({x1, y1, x2, y2, ...}, color, fill)` | any polygon, concave included |
+| `d3gl.draw_char(x, y, char, color, scale)` | 5x7 glyph |
+| `d3gl.draw_text(x, y, text, color, scale)` | text, `\n` supported |
+| `d3gl.text_size(text, scale)` | width, height in pixels |
+| `d3gl.draw_fps(x?, y?, fg?, bg?)` | FPS overlay |
+
+### Colors
+
+Colors are ABGR integers (`0xAABBGGRR`). On d3m0n integers are 32-bit, so
+opaque colors are negative: compare them with `==` only.
+
+| Function | Description |
+| --- | --- |
+| `d3gl.rgb(r, g, b)`, `d3gl.rgba(r, g, b, a)` | 0-255 channels |
+| `d3gl.hex("#rrggbb")` | also `#rgb`, `#rrggbbaa` |
+| `d3gl.hsv(h, s, v)` | hue in degrees, s/v in 0-1 |
+| `d3gl.color.unpack(c)` | r, g, b, a |
+| `d3gl.color.lerp(c1, c2, t)`, `d3gl.color.scale(c, k)`, `d3gl.color.with_alpha(c, a)` | blending helpers |
+| `d3gl.Colors.*` | `BLACK WHITE GREY DARK_GREY RED GREEN BLUE YELLOW CYAN MAGENTA ORANGE PURPLE PINK TRANSPARENT` |
+
+### Utilities
+
+Loaded on first access:
+
+- `d3gl.vec2`: 2D vectors. Operators allocate (`a + b`, `v * 2`); methods
+  ending with `_` mutate in place (`add_`, `sub_`, `scale_`, `normalize_`,
+  `limit_`, `set_len_`, `rotate_`, `add_scaled_`). Also `len`, `len2`, `dist`,
+  `dist2`, `dot`, `cross`, `angle`, `perp`, `vec2.from_angle(a, len)`,
+  `vec2.random(len)`.
+- `d3gl.mathx`: `clamp`, `lerp`, `inverse_lerp`, `map`, `wrap`, `sign`,
+  `round`, `angle_diff`, `lerp_angle`, `random_range`, `chance`, `pick`,
+  `dist`, `dist2`, `PI`, `TAU`.
+- `d3gl.class`, `d3gl.logger`, `d3gl.json`, `d3gl.env`, `d3gl.Timer`, `d3gl.font`, `d3gl.bit`.
+
+### Developing on a PC
+
+```sh
+lua path/to/app/main.lua               # headless, 120 frames by default
+D3GL_FRAMES=10 D3GL_SCREENSHOT=out.ppm lua main.lua
+```
+
+Point `package.path` at this repository first, e.g.
+`package.path = "../?/lua/init.lua;" .. package.path` from a sibling project.
+
 ## API reference
 
 The following API describes the Lua interface. Python equivalents depend on the functions and names exported by the Python implementation.
@@ -218,7 +327,7 @@ The same approach can be implemented in Python using the equivalent functions ex
 ## Notes and limitations
 
 - Initialize the surface before calling `d3gl.putpixel()` or `d3gl.update()`.
-- Drawing outside the surface bounds is invalid.
+- Drawing outside the surface bounds is invalid in Python; the Lua primitives clip silently.
 - Surface creation and updates depend on the operating system's graphics support.
 - Pixel format and color channel order must match the format expected by the underlying surface.
 - The API focuses on pixel-level drawing. Higher-level primitives, such as lines, circles, and rectangles, can be implemented using pixel drawing.
@@ -234,7 +343,7 @@ The same approach can be implemented in Python using the equivalent functions ex
 - [x]Drawing lines and rectangles
 - [x]Drawing circles
 - [ ]Image loading
-- [ ]Text rendering
+- [x]Text rendering
 
 ## Related projects
 
