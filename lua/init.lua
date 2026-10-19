@@ -1,4 +1,6 @@
 local d3gl = {}
+d3gl.class = require("class")
+d3gl.logger = require("logger")
 local sys = require("sys")
 
 d3gl.Colors = {
@@ -37,5 +39,6 @@ function d3gl.update()
     assert(surface, "d3gl.init() must be called first")
     return sys.surface_update(surface)
 end
+
 
 return d3gl
