@@ -45,6 +45,18 @@ class Core:
 
         sys.c_buffer_uint32_set(self.surface, (y * self.width + x), color)
 
+    def draw_hline(self, x: int, y: int, length: int, color: int) -> None:
+        if self.surface is None:
+            raise d3glException("Surface address could not be resolved, failed to initialize")
+        if x < 0 or x >= self.width:
+            raise d3glException("X out of bounds")
+        if y < 0 or y >= self.height:
+            raise d3glException("Y out of bounds")
+        if x + length > self.width:
+            raise d3glException("Length out of bounds")
+
+        sys.c_buffer_mul_uint32_set(self.surface, (y * self.width + x), length, color)
+
 
     def update(self) -> None:
         if self.surface is None:
