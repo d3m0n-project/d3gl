@@ -205,16 +205,6 @@ Loaded on first access:
   `dist`, `dist2`, `PI`, `TAU`.
 - `d3gl.class`, `d3gl.logger`, `d3gl.json`, `d3gl.env`, `d3gl.Timer`, `d3gl.font`, `d3gl.bit`.
 
-### Developing on a PC
-
-```sh
-lua path/to/app/main.lua               # headless, 120 frames by default
-D3GL_FRAMES=10 D3GL_SCREENSHOT=out.ppm lua main.lua
-```
-
-Point `package.path` at this repository first, e.g.
-`package.path = "../?/lua/init.lua;" .. package.path` from a sibling project.
-
 ## API reference
 
 The following API describes the Lua interface. Python equivalents depend on the functions and names exported by the Python implementation.
@@ -335,15 +325,15 @@ The same approach can be implemented in Python using the equivalent functions ex
 
 ## Roadmap
 
-- [x]Basic Lua module structure
-- [x]Surface creation interface
-- [x]Python implementation
-- [ ]More pixel color constants
-- [ ]Reliable pixel-buffer access
-- [x]Drawing lines and rectangles
-- [x]Drawing circles
-- [ ]Image loading
-- [x]Text rendering
+- [x] Basic Lua module structure
+- [x] Surface creation interface
+- [x] Python implementation
+- [ ] More pixel color constants
+- [ ] Reliable pixel-buffer access
+- [x] Drawing lines and rectangles
+- [x] Drawing circles
+- [ ] Image loading
+- [x] Text rendering
 
 ## Related projects
 
